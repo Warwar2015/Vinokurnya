@@ -26,7 +26,7 @@ namespace VinokurnyaWpf.ViewModels
         public string TotalRecipesCount => TotalRecipes.Count.ToString();
         public string FavoriteRecipesCount => FavoriteRecipes.Count.ToString();
         public string TotalNotesCount => TotalNotes.Count.ToString();
-        public string AverageRating => TotalRecipes.Any() ? (TotalRecipes.Average(r => r.Rating):0).ToString("F1") : "0.0";
+        public string AverageRating => TotalRecipes.Any() ? TotalRecipes.Average(r => r.Rating).ToString("F1") : "0.0";
         public string MostUsedCategory => TotalRecipes.Any() ? GetMostUsedCategory() : "Нет данных";
 
         public StatisticsViewModel()
