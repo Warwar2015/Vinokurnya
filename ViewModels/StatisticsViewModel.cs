@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VinokurnyaWpf.Data;
 using VinokurnyaWpf.Services;
+using VinokurnyaWpf.Helpers;
 
 namespace VinokurnyaWpf.ViewModels
 {
