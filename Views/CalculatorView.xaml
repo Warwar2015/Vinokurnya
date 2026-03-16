@@ -23,7 +23,7 @@
         <!-- Calculator Selection -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
             <TextBlock Text="Инженерные калькуляторы" FontSize="28" FontWeight="Bold" Margin="0,0,0,15"/>
-            <StackPanel Orientation="Horizontal" Spacing="10">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
                 <Button Command="{Binding CalculateDilutionCommand}" 
                         Content="💧 Разбавление спирта" 
                         Style="{DynamicResource MaterialDesignRaisedButton}"

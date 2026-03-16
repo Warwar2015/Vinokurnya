@@ -39,7 +39,7 @@
                         Padding="10"/>
                 <ComboBox Width="200" ItemsSource="{Binding Stages}" 
                          SelectedItem="{Binding SelectedStage}" 
-                         MaterialDesign:HintAssist.Hint="Этап"
+                         materialDesign:HintAssist.Hint="Этап"
                          Padding="10"
                          Margin="10,0,0,0"/>
 

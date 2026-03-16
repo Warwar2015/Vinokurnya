@@ -39,7 +39,7 @@
                         Padding="10"/>
                 <ComboBox Width="200" ItemsSource="{Binding Categories}" 
                          SelectedItem="{Binding SelectedCategory}" 
-                         MaterialDesign:HintAssist.Hint="Категория"
+                         materialDesign:HintAssist.Hint="Категория"
                          Padding="10"
                          Margin="10,0,0,0"/>
 
