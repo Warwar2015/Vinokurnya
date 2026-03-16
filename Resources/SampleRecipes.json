@@ -1,0 +1,97 @@
+[
+  {
+    "id": "recipe-001",
+    "name": "Классический односолодовый виски",
+    "category": "Виски",
+    "subcategory": "Single Malt",
+    "difficulty": 4,
+    "timeDays": 14,
+    "yieldLiters": 3.5,
+    "rating": 4.8,
+    "ratingCount": 45,
+    "isFavorite": true,
+    "ingredients": [
+      {"name": "Ячмень", "quantity": 5, "unit": "кг"},
+      {"name": "Вода", "quantity": 15, "unit": "л"},
+      {"name": "Хмель", "quantity": 0.2, "unit": "кг"},
+      {"name": "Дрожжи", "quantity": 0.05, "unit": "г"}
+    ],
+    "steps": [
+      {"order": 1, "description": "Затирание – 180 минут при 65°C"},
+      {"order": 2, "description": "Ферментация – 7 дней при 22°C"},
+      {"order": 3, "description": "Перегонка – первый проход"}
+    ],
+    "distillationParameters": {
+      "initialABV": 25,
+      "targetABV": 65,
+      "headsPercentage": 12,
+      "heartsPercentage": 78,
+      "tailsPercentage": 10,
+      "temperature": 78,
+      "atmosphericPressure": 1013
+    }
+  },
+  {
+    "id": "recipe-002",
+    "name": "Бюджетный бурбон",
+    "category": "Бурбон",
+    "subcategory": "Bourbon",
+    "difficulty": 3,
+    "timeDays": 10,
+    "yieldLiters": 4.0,
+    "rating": 4.6,
+    "ratingCount": 32,
+    "isFavorite": true,
+    "ingredients": [
+      {"name": "Кукуруза", "quantity": 7, "unit": "кг"},
+      {"name": "Ячмень", "quantity": 2, "unit": "кг"},
+      {"name": "Пшеница", "quantity": 1, "unit": "кг"},
+      {"name": "Дрожжи", "quantity": 0.04, "unit": "г"}
+    ],
+    "steps": [
+      {"order": 1, "description": "Затирание – 120 минут при 68°C"},
+      {"order": 2, "description": "Ферментация – 5 дней при 20°C"},
+      {"order": 3, "description": "Перегонка с хОС"}
+    ],
+    "distillationParameters": {
+      "initialABV": 30,
+      "targetABV": 62,
+      "headsPercentage": 10,
+      "heartsPercentage": 80,
+      "tailsPercentage": 10,
+      "temperature": 78,
+      "atmosphericPressure": 1013
+    }
+  },
+  {
+    "id": "recipe-003",
+    "name": "Лимонная настойка",
+    "category": "Настойки",
+    "subcategory": "Цитрусовые",
+    "difficulty": 1,
+    "timeDays": 14,
+    "yieldLiters": 1.0,
+    "rating": 4.9,
+    "ratingCount": 68,
+    "isFavorite": true,
+    "ingredients": [
+      {"name": "Лимоны", "quantity": 500, "unit": "г"},
+      {"name": "Водка 40%", "quantity": 1, "unit": "л"},
+      {"name": "Сахар", "quantity": 150, "unit": "г"}
+    ],
+    "steps": [
+      {"order": 1, "description": "Нарезать лимоны ломтиками"},
+      {"order": 2, "description": "Настаивать 2 недели"},
+      {"order": 3, "description": "Фильтровать через марлю"}
+    ],
+    "distillationParameters": {
+      "initialABV": 0,
+      "targetABV": 0,
+      "headsPercentage": 0,
+      "heartsPercentage": 0,
+      "tailsPercentage": 0,
+      "temperature": 0,
+      "atmosphericPressure": 0
+    }
+  }
+]

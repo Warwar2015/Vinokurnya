@@ -1,0 +1,323 @@
+<UserControl x:Class="VinokurnyaWpf.Views.CalculatorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:VinokurnyaWpf.ViewModels"
+             xmlns:local="clr-namespace:VinokurnyaWpf.Views"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="1200">
+
+    <UserControl.DataContext>
+        <vm:CalculatorViewModel/>
+    </UserControl.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Calculator Selection -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Инженерные калькуляторы" FontSize="28" FontWeight="Bold" Margin="0,0,0,15"/>
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <Button Command="{Binding CalculateDilutionCommand}" 
+                        Content="💧 Разбавление спирта" 
+                        Style="{DynamicResource MaterialDesignRaisedButton}"
+                        Padding="15,10"
+                        Tag="Dilution"/>
+                <Button Command="{Binding CalculateDistillationCommand}" 
+                        Content="🔥 Дробная перегонка" 
+                        Style="{DynamicResource MaterialDesignRaisedButton}"
+                        Padding="15,10"
+                        Tag="Distillation"/>
+                <Button Command="{Binding CalculateSpeedCommand}" 
+                        Content="⚡ Скорость отбора" 
+                        Style="{DynamicResource MaterialDesignRaisedButton}"
+                        Padding="15,10"
+                        Tag="Speed"/>
+                <Button Command="{Binding CalculateTemperatureCommand}" 
+                        Content="🌡️ Температура" 
+                        Style="{DynamicResource MaterialDesignRaisedButton}"
+                        Padding="15,10"
+                        Tag="Temperature"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Calculator Inputs -->
+        <Grid Grid.Row="1">
+            <!-- Dilution Calculator -->
+            <ScrollViewer Visibility="{Binding SelectedCalculator, Converter={local:CalculatorTypeToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Расчет разбавления спирта" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Volume -->
+                        <Label Grid.Row="0" Grid.Column="0" Content="Объем (мл):"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding VolumeMl, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Введите объем спирта"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="мл"/>
+
+                        <!-- Current ABV -->
+                        <Label Grid.Row="1" Grid.Column="0" Content="Текущая крепость (%):"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CurrentABV, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Текущая крепость"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="%"/>
+
+                        <!-- Target ABV -->
+                        <Label Grid.Row="2" Grid.Column="0" Content="Целевая крепость (%):"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding TargetABV, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Желаемая крепость"/>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="%"/>
+
+                        <!-- Temperature -->
+                        <Label Grid.Row="3" Grid.Column="0" Content="Температура (°C):"/>
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding TemperatureC, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Температура смеси"/>
+                        <TextBlock Grid.Row="3" Grid.Column="2" Text="°C"/>
+
+                        <!-- Calculate Button -->
+                        <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="4" 
+                                Content="Рассчитать"
+                                Command="{Binding CalculateDilutionCommand}"
+                                Style="{DynamicResource MaterialDesignRaisedButton}"
+                                Margin="15,0,0,0"/>
+                    </Grid>
+
+                    <!-- Result -->
+                    <Border BorderBrush="{DynamicResource PrimaryBrush}" 
+                            BorderThickness="2" 
+                            Background="{DynamicResource PrimaryBrush}"
+                            Opacity="0.1"
+                            CornerRadius="10"
+                            Margin="0,20,0,0"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="Результат:" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                            <TextBlock Text="{Binding DilutionResult}" FontSize="16" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Distillation Calculator -->
+            <ScrollViewer Visibility="{Binding SelectedCalculator, Converter={local:CalculatorTypeToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Расчет дробной перегонки" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Volume -->
+                        <Label Grid.Row="0" Grid.Column="0" Content="Объем сырца (л):"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding DistillationVolume, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Объем перегоняемого сырья"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="л"/>
+
+                        <!-- Initial ABV -->
+                        <Label Grid.Row="1" Grid.Column="0" Content="Начальная крепость (%):"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DistillationABV, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Крепость перед перегонкой"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="%"/>
+
+                        <!-- Heads Percentage -->
+                        <Label Grid.Row="2" Grid.Column="0" Content="Процент голов (%):"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedCalculator}" 
+                                Visibility="Collapsed"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="12%" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Типично"/>
+
+                        <!-- Calculate Button -->
+                        <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="4" 
+                                Content="Рассчитать"
+                                Command="{Binding CalculateDistillationCommand}"
+                                Style="{DynamicResource MaterialDesignRaisedButton}"
+                                Margin="15,0,0,0"/>
+                    </Grid>
+
+                    <!-- Result -->
+                    <Border BorderBrush="{DynamicResource PrimaryBrush}" 
+                            BorderThickness="2" 
+                            Background="{DynamicResource PrimaryBrush}"
+                            Opacity="0.1"
+                            CornerRadius="10"
+                            Margin="0,20,0,0"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="Результат:" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                            <TextBlock Text="{Binding DistillationResult}" FontSize="16" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Speed Calculator -->
+            <ScrollViewer Visibility="{Binding SelectedCalculator, Converter={local:CalculatorTypeToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Расчет оптимальной скорости отбора" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- ABV -->
+                        <Label Grid.Row="0" Grid.Column="0" Content="Крепость (%):"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SpeedABV, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Крепость дистиллята"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="%"/>
+
+                        <!-- Temperature -->
+                        <Label Grid.Row="1" Grid.Column="0" Content="Температура (°C):"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SpeedTemperature, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Температура перегонки"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="°C"/>
+
+                        <!-- Equipment Factor -->
+                        <Label Grid.Row="2" Grid.Column="0" Content="Фактор оборудования:"/>
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EquipmentFactor, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="1.0 - стандартное оборудование"/>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text=""/>
+
+                        <!-- Calculate Button -->
+                        <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="4" 
+                                Content="Рассчитать"
+                                Command="{Binding CalculateSpeedCommand}"
+                                Style="{DynamicResource MaterialDesignRaisedButton}"
+                                Margin="15,0,0,0"/>
+                    </Grid>
+
+                    <!-- Result -->
+                    <Border BorderBrush="{DynamicResource PrimaryBrush}" 
+                            BorderThickness="2" 
+                            Background="{DynamicResource PrimaryBrush}"
+                            Opacity="0.1"
+                            CornerRadius="10"
+                            Margin="0,20,0,0"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="Результат:" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                            <TextBlock Text="{Binding SpeedResult}" FontSize="16" Margin="0,10,0,0"/>
+                            <TextBlock Text="{Binding SpeedIntensity}" FontWeight="Bold" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Temperature Calculator -->
+            <ScrollViewer Visibility="{Binding SelectedCalculator, Converter={local:CalculatorTypeToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="Расчет температурных режимов" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- ABV -->
+                        <Label Grid.Row="0" Grid.Column="0" Content="Крепость (%):"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding TemperatureABV, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Крепость дистиллята"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Text="%"/>
+
+                        <!-- Atmospheric Pressure -->
+                        <Label Grid.Row="1" Grid.Column="0" Content="Атмосферное давление (гПа):"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding AtmosphericPressure, Mode=TwoWay}"
+                                materialDesign:HintAssist.Hint="Стандартное: 1013.25"/>
+                        <TextBlock Grid.Row="1" Grid.Column="2" Text="гПа"/>
+
+                        <!-- Calculate Button -->
+                        <Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="4" 
+                                Content="Рассчитать"
+                                Command="{Binding CalculateTemperatureCommand}"
+                                Style="{DynamicResource MaterialDesignRaisedButton}"
+                                Margin="15,0,0,0"/>
+                    </Grid>
+
+                    <!-- Result -->
+                    <Border BorderBrush="{DynamicResource PrimaryBrush}" 
+                            BorderThickness="2" 
+                            Background="{DynamicResource PrimaryBrush}"
+                            Opacity="0.1"
+                            CornerRadius="10"
+                            Margin="0,20,0,0"
+                            Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="Результат:" FontWeight="Bold" Foreground="{DynamicResource PrimaryBrush}"/>
+                            <TextBlock Text="{Binding TemperatureResult}" FontSize="16" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Calculation History -->
+        <Border Grid.Row="2" BorderBrush="{DynamicResource PrimaryBrush}" 
+                BorderThickness="2" CornerRadius="10" Padding="15"
+                Background="{DynamicResource SecondaryBackgroundBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="История расчетов" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                <ScrollViewer Grid.Row="1">
+                    <DataGrid ItemsSource="{Binding CalculationHistory}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Тип расчета" Binding="{Binding CalculationType}" Width="*"/>
+                            <DataGridTextColumn Header="Дата" Binding="{Binding CalculatedAt, StringFormat='dd.MM.yyyy HH:mm'}" Width="120"/>
+                            <DataGridTextColumn Header="Параметры" Binding="{Binding ParametersJson}" Width="2*"/>
+                            <DataGridTextColumn Header="Результат" Binding="{Binding ResultJson}" Width="3*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
