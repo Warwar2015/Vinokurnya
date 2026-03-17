@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Data;
+using System.Transactions;
+using Microsoft.EntityFrameworkCore;
 using VinokurnyaWpf.Data;
 
 namespace VinokurnyaWpf.Services
@@ -34,6 +37,14 @@ namespace VinokurnyaWpf.Services
                 .ToListAsync();
         }
 
+        public Task<List<Recipe>> GetRecipesBySubcategoryAsync(string subcategory)
+        {
+            return _dbContext.Recipes
+                .Where(r => r.Subcategory == subcategory)
+                .OrderByDescending(r => r.Rating)
+                .ToListAsync();
+        }
+
         public Task<List<Recipe>> GetFavoriteRecipesAsync()
         {
             return _dbContext.Recipes
@@ -44,54 +55,124 @@ namespace VinokurnyaWpf.Services
 
         public Task<List<Recipe>> SearchRecipesAsync(string query)
         {
-            query = query.ToLower();
+            // Параметризованный поиск для предотвращения SQL Injection
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return _dbContext.Recipes
+                    .OrderByDescending(r => r.Rating)
+                    .ToListAsync();
+            }
+
             return _dbContext.Recipes
-                .Where(r => r.Name.ToLower().Contains(query) ||
-                           r.Category.ToLower().Contains(query) ||
-                           r.Subcategory.ToLower().Contains(query) ||
-                           r.Notes.ToLower().Contains(query))
+                .Where(r => EF.Functions.Like(r.Name.ToLower(), $"%{query.ToLower()}%") ||
+                           EF.Functions.Like(r.Category.ToLower(), $"%{query.ToLower()}%") ||
+                           EF.Functions.Like(r.Subcategory.ToLower(), $"%{query.ToLower()}%") ||
+                           EF.Functions.Like(r.Notes.ToLower(), $"%{query.ToLower()}%"))
                 .OrderByDescending(r => r.Rating)
                 .ToListAsync();
         }
 
         public Task AddRecipeAsync(Recipe recipe)
         {
-            recipe.CreatedAt = DateTime.UtcNow;
-            recipe.UpdatedAt = DateTime.UtcNow;
-            _dbContext.Recipes.Add(recipe);
-            return _dbContext.SaveChangesAsync();
+            // Используем TransactionScope для атомарного сохранения
+            return Task.Run(() =>
+            {
+                using var transaction = _dbContext.Database.BeginTransaction();
+
+                try
+                {
+                    recipe.CreatedAt = DateTime.UtcNow;
+                    recipe.UpdatedAt = DateTime.UtcNow;
+                    _dbContext.Recipes.Add(recipe);
+
+                    _dbContext.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception($"Ошибка при сохранении рецепта: {ex.Message}", ex);
+                }
+            });
         }
 
         public Task UpdateRecipeAsync(Recipe recipe)
         {
-            recipe.UpdatedAt = DateTime.UtcNow;
-            _dbContext.Recipes.Update(recipe);
-            return _dbContext.SaveChangesAsync();
+            // Используем TransactionScope для атомарного сохранения
+            return Task.Run(() =>
+            {
+                using var transaction = _dbContext.Database.BeginTransaction();
+
+                try
+                {
+                    recipe.UpdatedAt = DateTime.UtcNow;
+                    _dbContext.Recipes.Update(recipe);
+
+                    _dbContext.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception($"Ошибка при обновлении рецепта: {ex.Message}", ex);
+                }
+            });
         }
 
         public Task DeleteRecipeAsync(Guid id)
         {
-            var recipe = _dbContext.Recipes.Find(id);
-            if (recipe != null)
+            return Task.Run(() =>
             {
-                _dbContext.Recipes.Remove(recipe);
-                return _dbContext.SaveChangesAsync();
-            }
-            return Task.CompletedTask;
+                using var transaction = _dbContext.Database.BeginTransaction();
+
+                try
+                {
+                    var recipe = _dbContext.Recipes.Find(id);
+                    if (recipe != null)
+                    {
+                        _dbContext.Recipes.Remove(recipe);
+                        _dbContext.SaveChanges();
+                        transaction.Commit();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception($"Ошибка при удалении рецепта: {ex.Message}", ex);
+                }
+            });
         }
 
         public Task<ToggleFavoriteResult> ToggleFavoriteAsync(Guid id)
         {
-            var recipe = _dbContext.Recipes.Find(id);
-            if (recipe == null)
-                return Task.FromResult(ToggleFavoriteResult.NotFound);
+            return Task.Run(() =>
+            {
+                using var transaction = _dbContext.Database.BeginTransaction();
 
-            recipe.IsFavorite = !recipe.IsFavorite;
-            recipe.UpdatedAt = DateTime.UtcNow;
-            _dbContext.Recipes.Update(recipe);
+                try
+                {
+                    var recipe = _dbContext.Recipes.Find(id);
+                    if (recipe == null)
+                    {
+                        transaction.Rollback();
+                        return ToggleFavoriteResult.NotFound;
+                    }
 
-            return _dbContext.SaveChangesAsync().ContinueWith(
-                _ => ToggleFavoriteResult.Success(recipe.IsFavorite));
+                    recipe.IsFavorite = !recipe.IsFavorite;
+                    recipe.UpdatedAt = DateTime.UtcNow;
+                    _dbContext.Recipes.Update(recipe);
+
+                    _dbContext.SaveChanges();
+                    transaction.Commit();
+
+                    return ToggleFavoriteResult.Success(recipe.IsFavorite);
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception($"Ошибка при переключении избранного: {ex.Message}", ex);
+                }
+            });
         }
 
         // Note operations
@@ -125,28 +206,71 @@ namespace VinokurnyaWpf.Services
 
         public Task AddNoteAsync(Note note)
         {
-            note.CreatedAt = DateTime.UtcNow;
-            note.UpdatedAt = DateTime.UtcNow;
-            _dbContext.Notes.Add(note);
-            return _dbContext.SaveChangesAsync();
+            return Task.Run(() =>
+            {
+                using var transaction = _dbContext.Database.BeginTransaction();
+
+                try
+                {
+                    note.CreatedAt = DateTime.UtcNow;
+                    note.UpdatedAt = DateTime.UtcNow;
+                    _dbContext.Notes.Add(note);
+
+                    _dbContext.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception($"Ошибка при сохранении заметки: {ex.Message}", ex);
+                }
+            });
         }
 
         public Task UpdateNoteAsync(Note note)
         {
-            note.UpdatedAt = DateTime.UtcNow;
-            _dbContext.Notes.Update(note);
-            return _dbContext.SaveChangesAsync();
+            return Task.Run(() =>
+            {
+                using var transaction = _dbContext.Database.BeginTransaction();
+
+                try
+                {
+                    note.UpdatedAt = DateTime.UtcNow;
+                    _dbContext.Notes.Update(note);
+
+                    _dbContext.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception($"Ошибка при обновлении заметки: {ex.Message}", ex);
+                }
+            });
         }
 
         public Task DeleteNoteAsync(Guid id)
         {
-            var note = _dbContext.Notes.Find(id);
-            if (note != null)
+            return Task.Run(() =>
             {
-                _dbContext.Notes.Remove(note);
-                return _dbContext.SaveChangesAsync();
-            }
-            return Task.CompletedTask;
+                using var transaction = _dbContext.Database.BeginTransaction();
+
+                try
+                {
+                    var note = _dbContext.Notes.Find(id);
+                    if (note != null)
+                    {
+                        _dbContext.Notes.Remove(note);
+                        _dbContext.SaveChanges();
+                        transaction.Commit();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    throw new Exception($"Ошибка при удалении заметки: {ex.Message}", ex);
+                }
+            });
         }
 
         // Calculation history
@@ -167,147 +291,145 @@ namespace VinokurnyaWpf.Services
         // Sample data
         public Task EnsureSampleDataAsync()
         {
-            var hasRecipes = _dbContext.Recipes.Any();
-            var hasNotes = _dbContext.Notes.Any();
+            // Используем транзакцию для предотвращения race condition
+            var transaction = _dbContext.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
 
-            if (hasRecipes && hasNotes)
-                return Task.CompletedTask;
+            try
+            {
+                var hasRecipes = _dbContext.Recipes.Any();
+                var hasNotes = _dbContext.Notes.Any();
 
-            return SeedSampleDataAsync();
+                if (hasRecipes && hasNotes)
+                {
+                    transaction.Commit();
+                    return Task.CompletedTask;
+                }
+
+                return SeedSampleDataAsync(transaction);
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
-        private async Task SeedSampleDataAsync()
+        private async Task SeedSampleDataAsync(IDbTransaction? transaction = null)
         {
-            var recipes = new List<Recipe>
+            // Если нет транзакции, создаем новую для атомарности
+            using var scope = transaction == null
+                ? new TransactionScope(TransactionScopeAsyncFlowOption.Enabled)
+                : null;
+
+            try
             {
-                new Recipe
+                if (transaction != null)
                 {
-                    Name = "Классический односолодовый виски",
-                    Category = "Виски",
-                    Subcategory = "Single Malt",
-                    Difficulty = 4,
-                    TimeDays = 14,
-                    YieldLiters = 3.5,
-                    Rating = 4.8,
-                    RatingCount = 45,
-                    IsFavorite = true,
-                    Ingredients = new List<RecipeIngredient>
-                    {
-                        new RecipeIngredient { Name = "Ячмень", Quantity = 5, Unit = "кг", IsChecked = false },
-                        new RecipeIngredient { Name = "Вода", Quantity = 15, Unit = "л", IsChecked = false },
-                        new RecipeIngredient { Name = "Хмель", Quantity = 0.2, Unit = "кг", IsChecked = false },
-                        new RecipeIngredient { Name = "Дрожжи", Quantity = 0.05, Unit = "г", IsChecked = false }
-                    },
-                    Steps = new List<RecipeStep>
-                    {
-                        new RecipeStep { Order = 1, Description = "Затирание – 180 минут при 65°C", DurationMinutes = 180, Temperature = 65 },
-                        new RecipeStep { Order = 2, Description = "Ферментация – 7 дней при 22°C", DurationMinutes = 10080, Temperature = 22 },
-                        new RecipeStep { Order = 3, Description = "Перегонка – первый проход", Temperature = 78 }
-                    },
-                    DistillationParameters = new DistillationParameters
-                    {
-                        InitialABV = 25,
-                        TargetABV = 65,
-                        HeadsPercentage = 12,
-                        HeartsPercentage = 78,
-                        TailsPercentage = 10,
-                        Temperature = 78,
-                        AtmosphericPressure = 1013
-                    }
-                },
-                new Recipe
-                {
-                    Name = "Бюджетный бурбон",
-                    Category = "Бурбон",
-                    Subcategory = "Bourbon",
-                    Difficulty = 3,
-                    TimeDays = 10,
-                    YieldLiters = 4.0,
-                    Rating = 4.6,
-                    RatingCount = 32,
-                    IsFavorite = true,
-                    Ingredients = new List<RecipeIngredient>
-                    {
-                        new RecipeIngredient { Name = "Кукуруза", Quantity = 7, Unit = "кг", IsChecked = false },
-                        new RecipeIngredient { Name = "Ячмень", Quantity = 2, Unit = "кг", IsChecked = false },
-                        new RecipeIngredient { Name = "Пшеница", Quantity = 1, Unit = "кг", IsChecked = false },
-                        new RecipeIngredient { Name = "Дрожжи", Quantity = 0.04, Unit = "г", IsChecked = false }
-                    },
-                    Steps = new List<RecipeStep>
-                    {
-                        new RecipeStep { Order = 1, Description = "Затирание – 120 минут при 68°C", DurationMinutes = 120, Temperature = 68 },
-                        new RecipeStep { Order = 2, Description = "Ферментация – 5 дней при 20°C", DurationMinutes = 4320, Temperature = 20 },
-                        new RecipeStep { Order = 3, Description = "Перегонка с хОС (холодное осахаривание)", Temperature = 78 }
-                    },
-                    DistillationParameters = new DistillationParameters
-                    {
-                        InitialABV = 30,
-                        TargetABV = 62,
-                        HeadsPercentage = 10,
-                        HeartsPercentage = 80,
-                        TailsPercentage = 10,
-                        Temperature = 78,
-                        AtmosphericPressure = 1013
-                    }
-                },
-                new Recipe
-                {
-                    Name = "Лимонная настойка",
-                    Category = "Настойки",
-                    Subcategory = "Цитрусовые",
-                    Difficulty = 1,
-                    TimeDays = 14,
-                    YieldLiters = 1.0,
-                    Rating = 4.9,
-                    RatingCount = 68,
-                    Ingredients = new List<RecipeIngredient>
-                    {
-                        new RecipeIngredient { Name = "Лимоны", Quantity = 500, Unit = "г", IsChecked = false },
-                        new RecipeIngredient { Name = "Водка 40%", Quantity = 1, Unit = "л", IsChecked = false },
-                        new RecipeIngredient { Name = "Сахар", Quantity = 150, Unit = "г", IsChecked = false }
-                    },
-                    Steps = new List<RecipeStep>
-                    {
-                        new RecipeStep { Order = 1, Description = "Нарезать лимоны ломтиками", DurationMinutes = 30 },
-                        new RecipeStep { Order = 2, Description = "Настаивать 2 недели в прохладном месте", DurationMinutes = 20160 },
-                        new RecipeStep { Order = 3, Description = "Фильтровать через марлю", DurationMinutes = 15 }
-                    }
+                    _dbContext.Database.UseTransaction(transaction);
                 }
-            };
 
-            await _dbContext.Recipes.AddRangeAsync(recipes);
-            await _dbContext.SaveChangesAsync();
+                var recipes = new List<Recipe>
+                {
+                    new Recipe
+                    {
+                        Name = "Классический односолодовый виски",
+                        Category = "Виски",
+                        Subcategory = "Single Malt",
+                        Difficulty = 4,
+                        TimeDays = 14,
+                        YieldLiters = 3.5,
+                        Rating = 4.8,
+                        RatingCount = 45,
+                        IsFavorite = true,
+                        IngredientsJson = "[{\"Name\":\"Ячмень\",\"Quantity\":5,\"Unit\":\"кг\",\"IsChecked\":false},{\"Name\":\"Вода\",\"Quantity\":15,\"Unit\":\"л\",\"IsChecked\":false},{\"Name\":\"Хмель\",\"Quantity\":0.2,\"Unit\":\"кг\",\"IsChecked\":false},{\"Name\":\"Дрожжи\",\"Quantity\":0.05,\"Unit\":\"г\",\"IsChecked\":false}]",
+                        StepsJson = "[{\"Order\":1,\"Description\":\"Затирание – 180 минут при 65°C\",\"DurationMinutes\":180,\"Temperature\":65},{\"Order\":2,\"Description\":\"Ферментация – 7 дней при 22°C\",\"DurationMinutes\":10080,\"Temperature\":22},{\"Order\":3,\"Description\":\"Перегонка – первый проход\",\"Temperature\":78}]",
+                        DistillationParametersJson = "{\"InitialABV\":25,\"TargetABV\":65,\"HeadsPercentage\":12,\"HeartsPercentage\":78,\"TailsPercentage\":10,\"Temperature\":78,\"AtmosphericPressure\":1013}",
+                        Notes = "Классический рецепт односолодового виски"
+                    },
+                    new Recipe
+                    {
+                        Name = "Бюджетный бурбон",
+                        Category = "Бурбон",
+                        Subcategory = "Bourbon",
+                        Difficulty = 3,
+                        TimeDays = 10,
+                        YieldLiters = 4.0,
+                        Rating = 4.6,
+                        RatingCount = 32,
+                        IsFavorite = true,
+                        IngredientsJson = "[{\"Name\":\"Кукуруза\",\"Quantity\":7,\"Unit\":\"кг\",\"IsChecked\":false},{\"Name\":\"Ячмень\",\"Quantity\":2,\"Unit\":\"кг\",\"IsChecked\":false},{\"Name\":\"Пшеница\",\"Quantity\":1,\"Unit\":\"кг\",\"IsChecked\":false},{\"Name\":\"Дрожжи\",\"Quantity\":0.04,\"Unit\":\"г\",\"IsChecked\":false}]",
+                        StepsJson = "[{\"Order\":1,\"Description\":\"Затирание – 120 минут при 68°C\",\"DurationMinutes\":120,\"Temperature\":68},{\"Order\":2,\"Description\":\"Ферментация – 5 дней при 20°C\",\"DurationMinutes\":4320,\"Temperature\":20},{\"Order\":3,\"Description\":\"Перегонка с хОС (холодное осахаривание)\",\"Temperature\":78}]",
+                        DistillationParametersJson = "{\"InitialABV\":30,\"TargetABV\":62,\"HeadsPercentage\":10,\"HeartsPercentage\":80,\"TailsPercentage\":10,\"Temperature\":78,\"AtmosphericPressure\":1013}",
+                        Notes = "Бюджетный вариант бурбона"
+                    },
+                    new Recipe
+                    {
+                        Name = "Лимонная настойка",
+                        Category = "Настойки",
+                        Subcategory = "Цитрусовые",
+                        Difficulty = 1,
+                        TimeDays = 14,
+                        YieldLiters = 1.0,
+                        Rating = 4.9,
+                        RatingCount = 68,
+                        IngredientsJson = "[{\"Name\":\"Лимоны\",\"Quantity\":500,\"Unit\":\"г\",\"IsChecked\":false},{\"Name\":\"Водка 40%\",\"Quantity\":1,\"Unit\":\"л\",\"IsChecked\":false},{\"Name\":\"Сахар\",\"Quantity\":150,\"Unit\":\"г\",\"IsChecked\":false}]",
+                        StepsJson = "[{\"Order\":1,\"Description\":\"Нарезать лимоны ломтиками\",\"DurationMinutes\":30},{\"Order\":2,\"Description\":\"Настаивать 2 недели в прохладном месте\",\"DurationMinutes\":20160},{\"Order\":3,\"Description\":\"Фильтровать через марлю\",\"DurationMinutes\":15}]",
+                        Notes = "Быстрая настойка на лимонах"
+                    }
+                };
 
-            var notes = new List<Note>
+                await _dbContext.Recipes.AddRangeAsync(recipes);
+                await _dbContext.SaveChangesAsync();
+
+                var notes = new List<Note>
+                {
+                    new Note
+                    {
+                        Title = "Рецепт: Виски из коньячного дистиллята",
+                        Content = "Нужно сделать 5 литров коньячного дистиллята с крепостью 70%. Использовать новую бочку из-под коньяка, предварительно обожженную. Настаивать 3 года.",
+                        Stage = ProcessStage.Aging,
+                        IsFavorite = true,
+                        Tags = "конняк, выдержка, бочка"
+                    },
+                    new Note
+                    {
+                        Title = "Наблюдения за перегонкой",
+                        Content = "При температуре 78°C крепость головы около 30%, тело – около 65%, хвосты – около 40%. Скорость отбора около 3 капель/секунда.",
+                        Stage = ProcessStage.Distillation,
+                        IsFavorite = false,
+                        Tags = "перегонка, наблюдения"
+                    },
+                    new Note
+                    {
+                        Title = "Инструкция по дегустации",
+                        Content = "Дегустацию проводить при температуре +18°C. Прогреть вилку в руках, дать дегустировать 30 мл за раз. Делать перерывы между ритуалами.",
+                        Stage = ProcessStage.Tasting,
+                        IsFavorite = false,
+                        Tags = "дегустация, методика"
+                    }
+                };
+
+                await _dbContext.Notes.AddRangeAsync(notes);
+                await _dbContext.SaveChangesAsync();
+
+                // Подтверждаем изменения при наличии внешней транзакции
+                if (transaction != null)
+                {
+                    transaction.Commit();
+                }
+            }
+            catch
             {
-                new Note
+                if (scope != null)
                 {
-                    Title = "Рецепт: Виски из коньячного дистиллята",
-                    Content = "Нужно сделать 5 литров коньячного дистиллята с крепостью 70%. Использовать новую бочку из-под коньяка, предварительно обожженную. Настаивать 3 года.",
-                    Stage = ProcessStage.Aging,
-                    IsFavorite = true,
-                    Tags = "коньяк, выдержка, бочка"
-                },
-                new Note
-                {
-                    Title = "Наблюдения за перегонкой",
-                    Content = "При температуре 78°C крепость головы около 30%, тело – около 65%, хвосты – около 40%. Скорость отбора около 3 капель/секунда.",
-                    Stage = ProcessStage.Distillation,
-                    IsFavorite = false,
-                    Tags = "перегонка, наблюдения"
-                },
-                new Note
-                {
-                    Title = "Инструкция по дегустации",
-                    Content = "Дегустацию проводить при температуре +18°C. Прогреть вилку в руках, дать дегустировать 30 мл за раз. Делать перерывы между ритуалами.",
-                    Stage = ProcessStage.Tasting,
-                    IsFavorite = false,
-                    Tags = "дегустация, методика"
+                    scope.Dispose();
                 }
-            };
-
-            await _dbContext.Notes.AddRangeAsync(notes);
-            await _dbContext.SaveChangesAsync();
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
+                throw;
+            }
         }
     }
 

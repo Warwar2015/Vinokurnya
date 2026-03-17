@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
+using System.IO;
 
 namespace VinokurnyaWpf.Data
 {
@@ -17,8 +18,15 @@ namespace VinokurnyaWpf.Data
         public double YieldLiters { get; set; } = 0;
         public double Rating { get; set; } = 0;
         public int RatingCount { get; set; } = 0;
+
+        [Required]
+        [StringLength(500)]
         public string ImagePath { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(5000)]
         public string Notes { get; set; } = string.Empty;
+
         public bool IsFavorite { get; set; } = false;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
@@ -50,6 +58,33 @@ namespace VinokurnyaWpf.Data
             get => System.Text.Json.JsonSerializer.Deserialize<DistillationParameters>(DistillationParametersJson)
                    ?? new DistillationParameters();
             set => DistillationParametersJson = System.Text.Json.JsonSerializer.Serialize(value);
+        }
+
+        // Свойство для безопасного доступа к ImagePath
+        [NotMapped]
+        public string SafeImagePath
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(ImagePath))
+                    return string.Empty;
+
+                try
+                {
+                    var fullPath = Path.GetFullPath(ImagePath);
+
+                    // Проверяем, что путь находится в разрешенной директории (опционально)
+                    // var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                    // if (!fullPath.StartsWith(baseDir, StringComparison.OrdinalIgnoreCase))
+                    //     return string.Empty;
+
+                    return fullPath;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
         }
     }
 

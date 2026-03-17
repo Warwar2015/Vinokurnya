@@ -40,6 +40,7 @@ namespace VinokurnyaWpf.Services
                     if (Enum.TryParse<ThemeType>(preference, out ThemeType parsedTheme))
                     {
                         _themePreference = parsedTheme;
+                        _currentTheme = parsedTheme; // Update current theme
                     }
                 }
             }
