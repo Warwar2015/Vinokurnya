@@ -506,5 +506,4 @@ namespace VinokurnyaWpf.Services
             }
         }
     }
-
 }
