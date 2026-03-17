@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.IO;
 using CommunityToolkit.Mvvm.Input;
 using VinokurnyaWpf.Data;
 using VinokurnyaWpf.Services;
@@ -120,15 +121,15 @@ namespace VinokurnyaWpf.ViewModels
         {
             try
             {
-                var result = await _dataService.ToggleFavoriteAsync(recipeId);
+                var isFavorite = await _dataService.ToggleFavoriteAsync(recipeId);
 
                 var recipe = Recipes.FirstOrDefault(r => r.Id == recipeId);
                 if (recipe != null)
                 {
-                    result = ToggleFavoriteResult.Success(!recipe.IsFavorite);
+                    recipe.IsFavorite = isFavorite;
                 }
 
-                if (result == ToggleFavoriteResult.Success)
+                if (isFavorite)
                 {
                     System.Windows.MessageBox.Show("Рецепт сохранен в избранное", "Успешно",
                         MessageBoxButton.OK, MessageBoxImage.Information);

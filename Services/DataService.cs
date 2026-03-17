@@ -143,7 +143,7 @@ namespace VinokurnyaWpf.Services
             });
         }
 
-        public Task<ToggleFavoriteResult> ToggleFavoriteAsync(Guid id)
+        public Task<bool> ToggleFavoriteAsync(Guid id)
         {
             return Task.Run(() =>
             {
@@ -155,7 +155,7 @@ namespace VinokurnyaWpf.Services
                     if (recipe == null)
                     {
                         transaction.Rollback();
-                        return ToggleFavoriteResult.NotFound;
+                        return false;
                     }
 
                     recipe.IsFavorite = !recipe.IsFavorite;
@@ -165,7 +165,7 @@ namespace VinokurnyaWpf.Services
                     _dbContext.SaveChanges();
                     transaction.Commit();
 
-                    return ToggleFavoriteResult.Success(recipe.IsFavorite);
+                    return recipe.IsFavorite;
                 }
                 catch (Exception ex)
                 {
@@ -249,7 +249,7 @@ namespace VinokurnyaWpf.Services
             });
         }
 
-        public Task DeleteNoteAsync(Guid id)
+        public Task<bool> DeleteNoteAsync(Guid id)
         {
             return Task.Run(() =>
             {
@@ -263,7 +263,9 @@ namespace VinokurnyaWpf.Services
                         _dbContext.Notes.Remove(note);
                         _dbContext.SaveChanges();
                         transaction.Commit();
+                        return true;
                     }
+                    return false;
                 }
                 catch (Exception ex)
                 {
@@ -433,9 +435,4 @@ namespace VinokurnyaWpf.Services
         }
     }
 
-    public enum ToggleFavoriteResult
-    {
-        Success,
-        NotFound
-    }
 }

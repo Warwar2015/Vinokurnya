@@ -12,8 +12,9 @@ namespace VinokurnyaWpf
     {
         private static AppDbContext? _dbContext;
         private static DataService? _dataService;
+        private static DbContextOptions<AppDbContext>? _dbContextOptions;
 
-        public static AppDbContext DbContext => _dbContext ??= new AppDbContext();
+        public static AppDbContext DbContext => _dbContext ??= new AppDbContext(_dbContextOptions!);
         public static DataService DataService => _dataService ??= new DataService(DbContext);
         public static ThemeService ThemeService => ThemeService.Instance;
 
@@ -21,8 +22,13 @@ namespace VinokurnyaWpf
         {
             base.OnStartup(e);
 
+            // Initialize database context options
+            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            optionsBuilder.UseSqlite("Data Source=vinokurnya.db");
+            _dbContextOptions = optionsBuilder.Options;
+
             // Initialize services
-            _dbContext = new AppDbContext();
+            _dbContext = new AppDbContext(_dbContextOptions);
             _dataService = new DataService(_dbContext);
 
             // Initialize database and theme

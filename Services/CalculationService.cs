@@ -75,6 +75,8 @@ namespace VinokurnyaWpf.Services
 
             // Рекомендация по интенсивности
             string intensity;
+            string recommendation;
+
             if (optimalDropsPerSecond > 4)
             {
                 intensity = "🔴 Быстро";
