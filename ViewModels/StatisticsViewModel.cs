@@ -38,17 +38,20 @@ namespace VinokurnyaWpf.ViewModels
             FavoriteRecipes = new ObservableCollection<Recipe>();
             TotalNotes = new ObservableCollection<Note>();
 
-            LoadStatisticsAsync();
+            // Load statistics asynchronously after initialization
+            _ = LoadStatisticsAsync();
         }
 
-        private async void LoadStatisticsAsync()
+        public async Task LoadStatisticsAsync()
         {
             IsLoading = true;
             try
             {
-                var allRecipes = await _dataService.GetAllRecipesAsync();
-                var favoriteRecipes = await _dataService.GetFavoriteRecipesAsync();
-                var allNotes = await _dataService.GetAllNotesAsync();
+                if (_dataService != null)
+                {
+                    var allRecipes = await _dataService.GetAllRecipesAsync();
+                    var favoriteRecipes = await _dataService.GetFavoriteRecipesAsync();
+                    var allNotes = await _dataService.GetAllNotesAsync();
 
                 TotalRecipes.Clear();
                 FavoriteRecipes.Clear();

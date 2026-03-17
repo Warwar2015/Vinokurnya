@@ -48,6 +48,7 @@ namespace VinokurnyaWpf.ViewModels
 
         public ObservableCollection<string> Stages { get; }
         public ObservableCollection<Note> FilteredNotes { get; }
+        public Note? SelectedNote { get; set; }
 
         public ICommand SearchCommand { get; }
         public ICommand FilterCommand { get; }
@@ -71,21 +72,25 @@ namespace VinokurnyaWpf.ViewModels
             DeleteNoteCommand = new RelayCommand<Guid>(DeleteNote);
             ExportNotesCommand = new RelayCommand(ExportNotes);
 
-            LoadNotesAsync();
+            // Load notes asynchronously after initialization
+            _ = LoadNotesAsync();
         }
 
-        private async void LoadNotesAsync()
+        public async Task LoadNotesAsync()
         {
             IsLoading = true;
             try
             {
-                var allNotes = await _dataService.GetAllNotesAsync();
-                Notes.Clear();
-                foreach (var note in allNotes)
+                if (_dataService != null)
                 {
-                    Notes.Add(note);
+                    var allNotes = await _dataService.GetAllNotesAsync();
+                    Notes.Clear();
+                    foreach (var note in allNotes)
+                    {
+                        Notes.Add(note);
+                    }
+                    FilterNotes();
                 }
-                FilterNotes();
             }
             catch (Exception ex)
             {
@@ -153,7 +158,15 @@ namespace VinokurnyaWpf.ViewModels
             // Filter by stage
             if (!string.IsNullOrEmpty(SelectedStage) && SelectedStage != "Все")
             {
-                filtered = filtered.Where(n => n.Stage.ToString() == SelectedStage);
+                var stage = SelectedStage switch
+                {
+                    "Брага" => VinokurnyaWpf.Data.ProcessStage.Braga,
+                    "Перегонка" => VinokurnyaWpf.Data.ProcessStage.Distillation,
+                    "Выдержка" => VinokurnyaWpf.Data.ProcessStage.Aging,
+                    "Дегустация" => VinokurnyaWpf.Data.ProcessStage.Tasting,
+                    _ => VinokurnyaWpf.Data.ProcessStage.Other
+                };
+                filtered = filtered.Where(n => n.Stage == stage);
             }
 
             // Filter by search query

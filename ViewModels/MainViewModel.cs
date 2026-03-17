@@ -13,6 +13,7 @@ namespace VinokurnyaWpf.ViewModels
     {
         private readonly DataService _dataService;
         private readonly CalculationService _calculationService;
+        private readonly AppDbContext _dbContext;
 
         private int _selectedTab;
         private bool _isLoading;
@@ -39,6 +40,7 @@ namespace VinokurnyaWpf.ViewModels
         {
             _dataService = App.DataService;
             _calculationService = new CalculationService();
+            _dbContext = App.DbContext;
 
             FavoriteRecipes = new ObservableCollection<Recipe>();
             RecentNotes = new ObservableCollection<Note>();
@@ -46,25 +48,29 @@ namespace VinokurnyaWpf.ViewModels
             ToggleThemeCommand = new RelayCommand(ToggleTheme);
             ShowSettingsCommand = new RelayCommand(ShowSettings);
 
-            LoadDataAsync();
+            // Load data asynchronously after initialization
+            _ = LoadDataAsync();
         }
 
-        private async void LoadDataAsync()
+        public async Task LoadDataAsync()
         {
             IsLoading = true;
 
             try
             {
-                var recipes = await _dataService.GetFavoriteRecipesAsync();
-                foreach (var recipe in recipes)
+                if (_dataService != null)
                 {
-                    FavoriteRecipes.Add(recipe);
-                }
+                    var recipes = await _dataService.GetFavoriteRecipesAsync();
+                    foreach (var recipe in recipes)
+                    {
+                        FavoriteRecipes.Add(recipe);
+                    }
 
-                var notes = await _dataService.GetAllNotesAsync();
-                foreach (var note in notes.Take(5))
-                {
-                    RecentNotes.Add(note);
+                    var notes = await _dataService.GetAllNotesAsync();
+                    foreach (var note in notes.Take(5))
+                    {
+                        RecentNotes.Add(note);
+                    }
                 }
             }
             catch (Exception ex)
@@ -75,6 +81,24 @@ namespace VinokurnyaWpf.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        private void ToggleTheme()
+        {
+            App.ThemeService.ToggleTheme();
+        }
+
+        private void ShowSettings()
+        {
+            System.Windows.MessageBox.Show("Настройки будут доступны в будущих версиях", "Внимание",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
+
+        public void Cleanup()
+        {
+            IsLoading = false;
+            FavoriteRecipes.Clear();
+            RecentNotes.Clear();
         }
 
         private void ToggleTheme()

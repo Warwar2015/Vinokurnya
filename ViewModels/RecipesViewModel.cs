@@ -48,6 +48,7 @@ namespace VinokurnyaWpf.ViewModels
 
         public ObservableCollection<string> Categories { get; }
         public ObservableCollection<Recipe> FilteredRecipes { get; }
+        public Recipe? SelectedRecipe { get; set; }
 
         public ICommand SearchCommand { get; }
         public ICommand FilterCommand { get; }
@@ -69,21 +70,25 @@ namespace VinokurnyaWpf.ViewModels
             ToggleFavoriteCommand = new RelayCommand<Guid>(ToggleFavorite);
             ExportRecipesCommand = new RelayCommand(ExportRecipes);
 
-            LoadRecipesAsync();
+            // Load recipes asynchronously after initialization
+            _ = LoadRecipesAsync();
         }
 
-        private async void LoadRecipesAsync()
+        public async Task LoadRecipesAsync()
         {
             IsLoading = true;
             try
             {
-                var allRecipes = await _dataService.GetAllRecipesAsync();
-                Recipes.Clear();
-                foreach (var recipe in allRecipes)
+                if (_dataService != null)
                 {
-                    Recipes.Add(recipe);
+                    var allRecipes = await _dataService.GetAllRecipesAsync();
+                    Recipes.Clear();
+                    foreach (var recipe in allRecipes)
+                    {
+                        Recipes.Add(recipe);
+                    }
+                    FilterRecipes();
                 }
-                FilterRecipes();
             }
             catch (Exception ex)
             {

@@ -190,7 +190,8 @@ namespace VinokurnyaWpf.ViewModels
             CalculateTemperatureCommand = new RelayCommand(CalculateTemperature, CanCalculateTemperature);
             SaveCalculationCommand = new RelayCommand(SaveCalculation, CanSaveCalculation);
 
-            LoadCalculationHistoryAsync();
+            // Load calculation history asynchronously after initialization
+            _ = LoadCalculationHistoryAsync();
         }
 
         #region Dilution Calculator
@@ -359,10 +360,13 @@ namespace VinokurnyaWpf.ViewModels
         {
             try
             {
-                var history = await _dataService.GetCalculationHistoryAsync(50);
-                foreach (var item in history)
+                if (_dataService != null)
                 {
-                    CalculationHistory.Add(item);
+                    var history = await _dataService.GetCalculationHistoryAsync(50);
+                    foreach (var item in history)
+                    {
+                        CalculationHistory.Add(item);
+                    }
                 }
             }
             catch (Exception)

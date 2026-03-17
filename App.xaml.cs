@@ -12,44 +12,36 @@ namespace VinokurnyaWpf
     {
         private static AppDbContext? _dbContext;
         private static DataService? _dataService;
-        private static ThemeService? _themeService;
 
         public static AppDbContext DbContext => _dbContext ??= new AppDbContext();
         public static DataService DataService => _dataService ??= new DataService(DbContext);
-        public static ThemeService ThemeService => _themeService ??= new ThemeService();
+        public static ThemeService ThemeService => ThemeService.Instance;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            // Initialize database
-            InitializeDatabase();
-            
-            // Set theme from settings or system default
-            ThemeService.InitializeTheme();
-            
-            // Load sample data if needed
-            DataService.EnsureSampleData();
-        }
+            // Initialize services
+            _dbContext = new AppDbContext();
+            _dataService = new DataService(_dbContext);
 
-        private void InitializeDatabase()
-        {
-            try
+            // Initialize database and theme
+            _dbContext.Database.EnsureCreated();
+            ThemeService.LoadThemePreference();
+            ThemeService.ApplyTheme(ThemeService.CurrentTheme);
+
+            // Load sample data asynchronously
+            _ = Task.Run(async () =>
             {
-                DbContext.Database.EnsureCreated();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка инициализации базы данных: {ex.Message}", 
-                              "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+                await _dataService.EnsureSampleDataAsync();
+            });
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
             // Save theme preference
             ThemeService.SaveThemePreference();
-            
+
             // Clean up
             _dbContext?.Dispose();
             base.OnExit(e);
