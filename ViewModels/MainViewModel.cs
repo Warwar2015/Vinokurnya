@@ -100,24 +100,5 @@ namespace VinokurnyaWpf.ViewModels
             FavoriteRecipes.Clear();
             RecentNotes.Clear();
         }
-
-        private void ToggleTheme()
-        {
-            App.ThemeService.ToggleTheme();
-        }
-
-        private void ShowSettings()
-        {
-            // TODO: Open settings window
-            System.Windows.MessageBox.Show("Настройки будут доступны в будущих версиях", "Внимание", 
-                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
-        }
-
-        public void Cleanup()
-        {
-            IsLoading = false;
-            FavoriteRecipes.Clear();
-            RecentNotes.Clear();
-        }
     }
 }
