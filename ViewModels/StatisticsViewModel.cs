@@ -53,23 +53,24 @@ namespace VinokurnyaWpf.ViewModels
                     var favoriteRecipes = await _dataService.GetFavoriteRecipesAsync();
                     var allNotes = await _dataService.GetAllNotesAsync();
 
-                TotalRecipes.Clear();
-                FavoriteRecipes.Clear();
-                TotalNotes.Clear();
+                    TotalRecipes.Clear();
+                    FavoriteRecipes.Clear();
+                    TotalNotes.Clear();
 
-                foreach (var recipe in allRecipes)
-                {
-                    TotalRecipes.Add(recipe);
-                }
+                    foreach (var recipe in allRecipes)
+                    {
+                        TotalRecipes.Add(recipe);
+                    }
 
-                foreach (var recipe in favoriteRecipes)
-                {
-                    FavoriteRecipes.Add(recipe);
-                }
+                    foreach (var recipe in favoriteRecipes)
+                    {
+                        FavoriteRecipes.Add(recipe);
+                    }
 
-                foreach (var note in allNotes)
-                {
-                    TotalNotes.Add(note);
+                    foreach (var note in allNotes)
+                    {
+                        TotalNotes.Add(note);
+                    }
                 }
             }
             catch (Exception ex)
