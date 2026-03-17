@@ -293,30 +293,32 @@ namespace VinokurnyaWpf.Services
         // Sample data
         public Task EnsureSampleDataAsync()
         {
-            // Используем транзакцию для предотвращения race condition
-            var transaction = _dbContext.Database.BeginTransaction(System.Data.IsolationLevel.Serializable);
-
-            try
+            return Task.Run(async () =>
             {
-                var hasRecipes = _dbContext.Recipes.Any();
-                var hasNotes = _dbContext.Notes.Any();
+                using var transaction = _dbContext.Database.BeginTransaction();
 
-                if (hasRecipes && hasNotes)
+                try
                 {
-                    transaction.Commit();
-                    return Task.CompletedTask;
-                }
+                    var hasRecipes = await _dbContext.Recipes.AnyAsync();
+                    var hasNotes = await _dbContext.Notes.AnyAsync();
 
-                return SeedSampleDataAsync(transaction);
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
+                    if (hasRecipes && hasNotes)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+
+                    await SeedSampleDataAsync(transaction);
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            });
         }
 
-        private async Task SeedSampleDataAsync(IDbTransaction? transaction = null)
+        private async Task SeedSampleDataAsync(System.Data.Common.DbTransaction? transaction = null)
         {
             // Если нет транзакции, создаем новую для атомарности
             using var scope = transaction == null
@@ -418,6 +420,11 @@ namespace VinokurnyaWpf.Services
                 if (transaction != null)
                 {
                     transaction.Commit();
+                }
+
+                if (scope != null)
+                {
+                    scope.Complete();
                 }
             }
             catch

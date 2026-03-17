@@ -71,7 +71,7 @@ namespace VinokurnyaWpf.ViewModels
         }
 
         // Dilution result
-        private string _dilutionResult;
+        private string _dilutionResult = "";
         public string DilutionResult
         {
             get => _dilutionResult;
@@ -95,7 +95,7 @@ namespace VinokurnyaWpf.ViewModels
         }
 
         // Distillation result
-        private string _distillationResult;
+        private string _distillationResult = "";
         public string DistillationResult
         {
             get => _distillationResult;
@@ -125,21 +125,21 @@ namespace VinokurnyaWpf.ViewModels
             set => SetProperty(ref _equipmentFactor, value);
         }
 
-        private string _speedResult;
+        private string _speedResult = "";
         public string SpeedResult
         {
             get => _speedResult;
             set => SetProperty(ref _speedResult, value);
         }
 
-        private string _speedIntensity;
+        private string _speedIntensity = "";
         public string SpeedIntensity
         {
             get => _speedIntensity;
             set => SetProperty(ref _speedIntensity, value);
         }
 
-        private string _speedRecommendation;
+        private string _speedRecommendation = "";
         public string SpeedRecommendation
         {
             get => _speedRecommendation;
@@ -162,7 +162,7 @@ namespace VinokurnyaWpf.ViewModels
             set => SetProperty(ref _atmosphericPressure, value);
         }
 
-        private string _temperatureResult;
+        private string _temperatureResult = "";
         public string TemperatureResult
         {
             get => _temperatureResult;
