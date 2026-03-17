@@ -10,18 +10,12 @@ namespace VinokurnyaWpf.Views
         public CalculatorView()
         {
             InitializeComponent();
-
-            // Set up calculator type visibility converter
-            var converter = new CalculatorTypeToVisibilityConverter();
-            BindingOperations.SetBinding(this,
-                VisibilityProperty,
-                new Binding("SelectedCalculator") { Source = DataContext, Converter = converter });
         }
     }
 
-    public class CalculatorTypeToVisibilityConverter : System.Windows.Data.IValueConverter
+    public static class CalculatorTypeToVisibilityConverter : System.Windows.Data.IValueConverter
     {
-        public object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value == null) return System.Windows.Visibility.Collapsed;
 
@@ -33,7 +27,7 @@ namespace VinokurnyaWpf.Views
             return System.Windows.Visibility.Collapsed;
         }
 
-        public object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotImplementedException();
         }

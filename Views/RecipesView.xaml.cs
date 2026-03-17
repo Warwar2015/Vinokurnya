@@ -12,9 +12,9 @@ namespace VinokurnyaWpf.Views
     }
 
     // Value converters
-    public class DifficultyToStarsConverter : System.Windows.Data.IValueConverter
+    public static class DifficultyToStarsConverter : System.Windows.Data.IValueConverter
     {
-        public object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value is int difficulty)
             {
@@ -28,15 +28,15 @@ namespace VinokurnyaWpf.Views
             return "";
         }
 
-        public object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new System.NotImplementedException();
         }
     }
 
-    public class RatingToStarsConverter : System.Windows.Data.IValueConverter
+    public static class RatingToStarsConverter : System.Windows.Data.IValueConverter
     {
-        public object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value is double rating)
             {
@@ -58,15 +58,15 @@ namespace VinokurnyaWpf.Views
             return "";
         }
 
-        public object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new System.NotImplementedException();
         }
     }
 
-    public class BoolToTextConverter : System.Windows.Data.IValueConverter
+    public static class BoolToTextConverter : System.Windows.Data.IValueConverter
     {
-        public object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value is bool isChecked)
             {
@@ -75,7 +75,7 @@ namespace VinokurnyaWpf.Views
             return "Нет";
         }
 
-        public object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new System.NotImplementedException();
         }

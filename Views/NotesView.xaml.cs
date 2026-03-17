@@ -12,9 +12,9 @@ namespace VinokurnyaWpf.Views
         }
     }
 
-    public class StageToTextConverter : System.Windows.Data.IValueConverter
+    public static class StageToTextConverter : System.Windows.Data.IValueConverter
     {
-        public object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value is ProcessStage stage)
             {
@@ -31,7 +31,7 @@ namespace VinokurnyaWpf.Views
             return "Другое";
         }
 
-        public object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public static object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new System.NotImplementedException();
         }
