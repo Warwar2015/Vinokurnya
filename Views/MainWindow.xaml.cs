@@ -10,11 +10,23 @@ namespace VinokurnyaWpf.Views
         {
             try
             {
+                System.Diagnostics.Debug.WriteLine("=== MainWindow конструктор ===");
                 InitializeComponent();
+                System.Diagnostics.Debug.WriteLine("MainWindow InitializeComponent завершен");
 
                 // Initialize ViewModel with error handling
-                MainViewModel viewModel = new MainViewModel();
-                DataContext = viewModel;
+                try
+                {
+                    MainViewModel viewModel = new MainViewModel();
+                    DataContext = viewModel;
+                    System.Diagnostics.Debug.WriteLine("MainViewModel создан и назначен");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при создании MainViewModel:\n{ex.Message}\n\n{ex.StackTrace}",
+                        "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw;
+                }
 
                 // Handle closing event
                 Closing += (sender, e) =>
@@ -24,7 +36,7 @@ namespace VinokurnyaWpf.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при создании главного окна:\n{ex.Message}\n\n{ex.StackTrace}",
+                MessageBox.Show($"Ошибка при создании главного окна:\n{ex.Message}\n\nStack Trace:\n{ex.StackTrace}",
                     "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
 
                 // Close the window on error
