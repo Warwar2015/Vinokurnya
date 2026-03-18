@@ -26,7 +26,9 @@ namespace VinokurnyaWpf.Views
             {
                 MessageBox.Show($"Ошибка при создании главного окна:\n{ex.Message}\n\n{ex.StackTrace}",
                     "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                this.Shutdown();
+
+                // Close the window on error
+                this.Close();
             }
         }
     }
