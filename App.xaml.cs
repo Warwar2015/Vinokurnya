@@ -18,7 +18,7 @@ namespace VinokurnyaWpf
         public static DataService DataService => _dataService ??= new DataService(DbContext);
         public static ThemeService ThemeService => ThemeService.Instance;
 
-        protected override void OnStartup(StartupEventArgs e)
+        private void App_Startup(object sender, StartupEventArgs e)
         {
             try
             {
@@ -33,13 +33,12 @@ namespace VinokurnyaWpf
                 _dbContext = new AppDbContext(_dbContextOptions);
                 _dataService = new DataService(_dbContext);
 
-                // Initialize database and theme
+                // Initialize database
                 _dbContext.Database.EnsureCreated();
 
-                // Ensure ThemeService is initialized before using it
-                var themeService = ThemeService.Instance;
-                themeService.LoadThemePreference();
-                themeService.ApplyTheme(themeService.CurrentTheme);
+                // Ensure ThemeService is initialized
+                ThemeService.LoadThemePreference();
+                ThemeService.ApplyTheme(ThemeService.CurrentTheme);
 
                 // Load sample data asynchronously
                 _ = Task.Run(async () =>
@@ -56,7 +55,24 @@ namespace VinokurnyaWpf
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при запуске приложения: {ex.Message}\n\nStack Trace: {ex.StackTrace}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при запуске приложения:\n{ex.Message}\n\n{ex.StackTrace}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.Shutdown();
+            }
+        }
+
+        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            try
+            {
+                MessageBox.Show($"Необработанное исключение:\n{e.Exception.Message}\n\n{e.Exception.StackTrace}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch
+            {
+                // Catch any errors in the error handler itself
+            }
+            finally
+            {
+                e.Handled = true;
                 this.Shutdown();
             }
         }
