@@ -20,27 +20,45 @@ namespace VinokurnyaWpf
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
-
-            // Initialize database context options
-            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlite("Data Source=vinokurnya.db");
-            _dbContextOptions = optionsBuilder.Options;
-
-            // Initialize services
-            _dbContext = new AppDbContext(_dbContextOptions);
-            _dataService = new DataService(_dbContext);
-
-            // Initialize database and theme
-            _dbContext.Database.EnsureCreated();
-            ThemeService.LoadThemePreference();
-            ThemeService.ApplyTheme(ThemeService.CurrentTheme);
-
-            // Load sample data asynchronously
-            _ = Task.Run(async () =>
+            try
             {
-                await _dataService.EnsureSampleDataAsync();
-            });
+                base.OnStartup(e);
+
+                // Initialize database context options
+                var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+                optionsBuilder.UseSqlite("Data Source=vinokurnya.db");
+                _dbContextOptions = optionsBuilder.Options;
+
+                // Initialize services
+                _dbContext = new AppDbContext(_dbContextOptions);
+                _dataService = new DataService(_dbContext);
+
+                // Initialize database and theme
+                _dbContext.Database.EnsureCreated();
+
+                // Ensure ThemeService is initialized before using it
+                var themeService = ThemeService.Instance;
+                themeService.LoadThemePreference();
+                themeService.ApplyTheme(themeService.CurrentTheme);
+
+                // Load sample data asynchronously
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _dataService.EnsureSampleDataAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Ошибка при загрузке образцовых данных: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при запуске приложения: {ex.Message}\n\nStack Trace: {ex.StackTrace}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.Shutdown();
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)

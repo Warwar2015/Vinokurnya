@@ -12,8 +12,18 @@ namespace VinokurnyaWpf.Services
         private ThemeType _currentTheme = ThemeType.Dark;
         private ThemeType _themePreference = ThemeType.Dark;
         private static ThemeService? _instance;
+        private static readonly object _lock = new object();
 
-        public ThemeService()
+        static ThemeService()
+        {
+            // Initialize with dark theme by default
+            lock (_lock)
+            {
+                _instance = new ThemeService();
+            }
+        }
+
+        private ThemeService()
         {
             _currentTheme = ThemeType.Dark;
             _themePreference = ThemeType.Dark;
