@@ -19,8 +19,10 @@ namespace VinokurnyaWpf
         public static DataService DataService => _dataService ??= new DataService(DbContext);
         public static ThemeService ThemeService => ThemeService.Instance;
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override void OnStartup()
         {
+            StartupEventArgs e = StartupEventArgs.Empty;
+
             try
             {
                 System.Diagnostics.Debug.WriteLine("=== Приложение запускается ===");

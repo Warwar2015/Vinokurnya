@@ -6,6 +6,8 @@ namespace VinokurnyaWpf.Views
 {
     public partial class MainWindow : Window
     {
+        private MainViewModel? _viewModel;
+
         public MainWindow()
         {
             try
@@ -17,8 +19,8 @@ namespace VinokurnyaWpf.Views
                 // Initialize ViewModel with error handling
                 try
                 {
-                    MainViewModel viewModel = new MainViewModel();
-                    DataContext = viewModel;
+                    _viewModel = new MainViewModel();
+                    DataContext = _viewModel;
                     System.Diagnostics.Debug.WriteLine("MainViewModel создан и назначен");
                 }
                 catch (Exception ex)
@@ -31,7 +33,7 @@ namespace VinokurnyaWpf.Views
                 // Handle closing event
                 Closing += (sender, e) =>
                 {
-                    viewModel?.Cleanup();
+                    _viewModel?.Cleanup();
                 };
             }
             catch (Exception ex)
