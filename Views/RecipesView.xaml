@@ -62,19 +62,19 @@
                     <DataGridTextColumn Header="Подкатегория" Binding="{Binding Subcategory}" Width="120"/>
                     <DataGridTextColumn Header="Сложность" Width="80">
                         <DataGridTextColumn.Binding>
-                            <Binding Path="Difficulty" Converter="{local:DifficultyToStarsConverter}"/>
+                            <Binding Path="Difficulty" Converter="{StaticResource DifficultyToStarsConverter}"/>
                         </DataGridTextColumn.Binding>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="Время" Binding="{Binding TimeDays}" Width="80"/>
                     <DataGridTextColumn Header="Выход" Binding="{Binding YieldLiters}" Width="80"/>
                     <DataGridTextColumn Header="Рейтинг" Width="80">
                         <DataGridTextColumn.Binding>
-                            <Binding Path="Rating" Converter="{local:RatingToStarsConverter}"/>
+                            <Binding Path="Rating" Converter="{StaticResource RatingToStarsConverter}"/>
                         </DataGridTextColumn.Binding>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="Отмечено как любимое" Width="150">
                         <DataGridTextColumn.Binding>
-                            <Binding Path="IsFavorite" Converter="{local:BoolToTextConverter}"/>
+                            <Binding Path="IsFavorite" Converter="{StaticResource BoolToTextConverter}"/>
                         </DataGridTextColumn.Binding>
                     </DataGridTextColumn>
                     <DataGridTemplateColumn Header="Действия" Width="150">

@@ -9,12 +9,16 @@ namespace VinokurnyaWpf.Views
         public NotesView()
         {
             InitializeComponent();
+
+            // Set up converter instance
+            var converter = new StageToTextConverter();
+            Resources["StageToTextConverter"] = converter;
         }
     }
 
-    public static class StageToTextConverter : System.Windows.Data.IValueConverter
+    public class StageToTextConverter : System.Windows.Data.IValueConverter
     {
-        public static object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value is ProcessStage stage)
             {
@@ -31,7 +35,7 @@ namespace VinokurnyaWpf.Views
             return "Другое";
         }
 
-        public static object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new System.NotImplementedException();
         }

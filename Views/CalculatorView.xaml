@@ -50,7 +50,7 @@
         <!-- Calculator Inputs -->
         <Grid Grid.Row="1">
             <!-- Dilution Calculator -->
-            <ScrollViewer Visibility="{Binding SelectedCalculator, Converter={local:CalculatorTypeToVisibilityConverter}}">
+            <ScrollViewer Visibility="{Binding SelectedCalculator, Converter={StaticResource CalculatorTypeToVisibilityConverter}}">
                 <StackPanel>
                     <TextBlock Text="Расчет разбавления спирта" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
                     <Grid>

@@ -10,12 +10,16 @@ namespace VinokurnyaWpf.Views
         public CalculatorView()
         {
             InitializeComponent();
+
+            // Set up converter instance
+            var converter = new CalculatorTypeToVisibilityConverter();
+            Resources["CalculatorTypeToVisibilityConverter"] = converter;
         }
     }
 
-    public static class CalculatorTypeToVisibilityConverter : System.Windows.Data.IValueConverter
+    public class CalculatorTypeToVisibilityConverter : System.Windows.Data.IValueConverter
     {
-        public static object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value == null) return System.Windows.Visibility.Collapsed;
 
@@ -27,7 +31,7 @@ namespace VinokurnyaWpf.Views
             return System.Windows.Visibility.Collapsed;
         }
 
-        public static object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, System.Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotImplementedException();
         }

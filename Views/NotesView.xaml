@@ -60,14 +60,14 @@
                     <DataGridTextColumn Header="Название" Binding="{Binding Title}" Width="*"/>
                     <DataGridTextColumn Header="Этап" Width="100">
                         <DataGridTextColumn.Binding>
-                            <Binding Path="Stage" Converter="{local:StageToTextConverter}"/>
+                            <Binding Path="Stage" Converter="{StaticResource StageToTextConverter}"/>
                         </DataGridTextColumn.Binding>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="Дата создания" Binding="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" Width="100"/>
                     <DataGridTextColumn Header="Теги" Binding="{Binding Tags}" Width="200"/>
                     <DataGridTextColumn Header="Отмечено как любимое" Width="120">
                         <DataGridTextColumn.Binding>
-                            <Binding Path="IsFavorite" Converter="{local:BoolToTextConverter}"/>
+                            <Binding Path="IsFavorite" Converter="{StaticResource BoolToTextConverter}"/>
                         </DataGridTextColumn.Binding>
                     </DataGridTextColumn>
                     <DataGridTemplateColumn Header="Действия" Width="150">
