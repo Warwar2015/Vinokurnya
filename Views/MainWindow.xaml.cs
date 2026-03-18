@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using VinokurnyaWpf.ViewModels;
 
@@ -7,17 +8,26 @@ namespace VinokurnyaWpf.Views
     {
         public MainWindow()
         {
-            InitializeComponent();
-            
-            // Set DataContext
-            DataContext = new MainViewModel();
-            
-            // Handle closing event
-            Closing += (sender, e) => 
+            try
             {
-                var viewModel = DataContext as MainViewModel;
-                viewModel?.Cleanup();
-            };
+                InitializeComponent();
+
+                // Initialize ViewModel with error handling
+                MainViewModel viewModel = new MainViewModel();
+                DataContext = viewModel;
+
+                // Handle closing event
+                Closing += (sender, e) =>
+                {
+                    viewModel?.Cleanup();
+                };
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при создании главного окна:\n{ex.Message}\n\n{ex.StackTrace}",
+                    "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.Shutdown();
+            }
         }
     }
 }

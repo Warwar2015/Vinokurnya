@@ -92,7 +92,7 @@ namespace VinokurnyaWpf.Services
                 {
                     Uri themeUri = theme == ThemeType.Light
                         ? new Uri("pack://application:,,,/Resources/Themes/Light.xaml", UriKind.Absolute)
-                        : new Uri("pack://application:,,,/Resources/Themes/Dark.xaml", UriKind.Absolute);
+                        : new Uri("pack://application:~,~,~/Resources/Themes/Dark.xaml", UriKind.Absolute);
 
                     // Clear existing merged dictionaries
                     app.Resources.MergedDictionaries.Clear();
